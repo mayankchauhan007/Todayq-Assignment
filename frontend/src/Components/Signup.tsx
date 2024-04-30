@@ -13,14 +13,13 @@ import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useRecoilState } from "recoil";
-import { User, userState } from "../Store/Atoms/atoms";
+import { User, userDetailsState, userState } from "../Store/Atoms/atoms";
 
 function Signup() {
     const [name, setName] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [address, setAddress] = React.useState("");
-    const [user, setUser] = useRecoilState(userState);
     useEffect(() => {
         WebFont.load({
             google: {
@@ -68,7 +67,6 @@ function Signup() {
                             setPassword={setPassword}
                             address={address}
                             setAddress={setAddress}
-                            setUser={setUser}
                         />
                     </Grid>
 
@@ -92,9 +90,10 @@ function SignupCard({
     setPassword,
     address,
     setAddress,
-    setUser,
 }) {
     const navigate = useNavigate();
+    
+    const [userDetails,setUserDetails] = useRecoilState(userDetailsState);
     return (
         <Card
             elevation={10}
@@ -185,19 +184,27 @@ function SignupCard({
                                     address,
                                 }
                             );
-
+                            const {token,user} = response.data;
                             if (response.status === 200) {
-                                setUser((user: User) => ({
-                                    ...user,
-                                    userEmail: email,
-                                    name: name,
-                                    isLoading: false,
-                                }));
-                                const data = response.data;
-                                localStorage.setItem("token", data);
-                                localStorage.setItem("userEmail", email);
-                                console.log(data);
-                                navigate("/");
+                                setUserDetails({
+                                    _id: user._id,
+                                    name: user.name,
+                                    email: user.email,
+                                    password: user.password,
+                                    address: user.address,
+                                    role: user.role,
+                                  });
+
+                                localStorage.setItem("token", token);
+                                localStorage.setItem("userEmail", user.email);
+                                localStorage.setItem("role", user.role);
+                                console.log(userDetails);
+                                if (user.role === "admin") {
+                                    navigate("/"); // Redirect to user dashboard
+                                } else {
+                                    navigate("/"); // Redirect to user dashboard for other roles
+                                }
+
                             } else {
                                 window.alert(
                                     "Sign up failed. Please try again."

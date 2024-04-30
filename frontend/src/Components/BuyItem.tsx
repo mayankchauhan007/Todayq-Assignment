@@ -43,7 +43,7 @@ export default function BuyItem() {
 
     useEffect(() => {
       getFoodItem();
-    }, [])
+    }, [foodId])
     
 
     if (!selectedFood) {
@@ -74,7 +74,7 @@ export default function BuyItem() {
                         {selectedFood.description}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        Price: ${selectedFood.price}
+                        Price: Rs {selectedFood.price}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         Quantity:
@@ -109,7 +109,7 @@ export default function BuyItem() {
                         </button>
                     </Typography>
                     <br />
-                    <Button variant="contained">Buy Now</Button>
+                    <Button variant="contained">Proceed to Pay {selectedFood.price*quantity}</Button>
                 </CardContent>
             </Card>
         </div>

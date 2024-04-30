@@ -12,7 +12,7 @@ import food from "../assets/foods.jpg";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
-import { User, userState } from "../Store/Atoms/atoms";
+import { User, userDetailsState, userState } from "../Store/Atoms/atoms";
 import React from "react";
 import axios from "axios";
 
@@ -39,8 +39,6 @@ function Signin() {
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-    const [user, setUser] = useRecoilState(userState);
-
     const isMdScreen = useMediaQuery("(min-width: 600px)");
     return (
         <>
@@ -65,7 +63,6 @@ function Signin() {
                             setEmail={setEmail}
                             password={password}
                             setPassword={setPassword}
-                            setUser={setUser}
                         />
                     </Grid>
 
@@ -80,7 +77,8 @@ function Signin() {
     );
 }
 
-function SignInCard({ email, setEmail, password, setPassword, setUser }) {
+function SignInCard({ email, setEmail, password, setPassword }) {
+    const [userDetails, setUserDetails] = useRecoilState(userDetailsState);
     const navigate = useNavigate();
     return (
         <Card
@@ -157,18 +155,28 @@ function SignInCard({ email, setEmail, password, setPassword, setUser }) {
                                     password,
                                 }
                             );
-                            console.log(response);
+                            console.log(response.data);
+                            console.log("this is the response");
                             if (response.status === 200) {
-                                setUser((user: User) => ({
-                                    ...user,
-                                    userEmail: email,
-                                    isLoading: false,
-                                }));
-                                const data = response.data;
-                                localStorage.setItem("token", data);
-                                localStorage.setItem("userEmail", email);
-                                console.log(data);
-                                navigate("/");
+                                const { token, user } = response.data;
+                                localStorage.setItem("token", token);
+
+                                setUserDetails({
+                                    _id: user._id,
+                                    name: user.name,
+                                    email: user.email,
+                                    password: user.password,
+                                    address: user.address,
+                                    role: user.role,
+                                });
+                                console.log(userDetails);
+                                localStorage.setItem("userEmail", user.email);
+                                localStorage.setItem("role", user.role);
+                                if (user.role === "admin") {
+                                    navigate("/admin-dashboard"); // Redirect to admin dashboard if user is an admin
+                                } else {
+                                    navigate("/"); // Redirect to user dashboard for other roles
+                                }
                             } else {
                                 window.alert(
                                     "Sign up failed. Please try again."
@@ -177,7 +185,7 @@ function SignInCard({ email, setEmail, password, setPassword, setUser }) {
                         } catch (error) {
                             console.error("Error response:", error);
                             window.alert(
-                                "Sign in failed. Please check your network connection and try again."
+                                "Something went wrong ."
                             );
                         }
                     }}

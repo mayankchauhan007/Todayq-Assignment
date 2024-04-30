@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { authenticateJWT } from "../middlewares/auth";
+import { authenticateAdmin, authenticateUser } from "../middlewares/auth";
 import { Food } from "../db/db";
 
 const foodRouter = express.Router();
@@ -36,7 +36,7 @@ foodRouter.get("/:id", async (req: Request, res: Response) => {
     }
 });
 
-foodRouter.post("/", async (req: Request, res: Response) => {
+foodRouter.post("/",  authenticateAdmin,async (req: Request, res: Response) => {
     try {
         const { name } = req.body;
         const local = await Food.findOne({ name });
@@ -57,7 +57,7 @@ foodRouter.post("/", async (req: Request, res: Response) => {
 });
 
 //put mapping
-foodRouter.put("/:id", async (req: Request, res: Response) => {
+foodRouter.put("/:id",authenticateAdmin, async (req: Request, res: Response) => {
     try {
         const _id = req.params.id;
 
@@ -75,7 +75,7 @@ foodRouter.put("/:id", async (req: Request, res: Response) => {
     }
 });
 
-foodRouter.delete("/:id", async (req: Request, res: Response) => {
+foodRouter.delete("/:id",authenticateAdmin, async (req: Request, res: Response) => {
     try {
         const _id = req.params.id;
         const deletedFood = await Food.findByIdAndDelete(_id);

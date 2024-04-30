@@ -1,15 +1,15 @@
 import express, { Request, Response } from "express";
 import { Cart } from "../db/db";
 import { escapeLeadingUnderscores } from "typescript";
+import { authenticateUser } from "../middlewares/auth";
 
 const cartRouter = express.Router();
 cartRouter.use(express.json());
 
-cartRouter.post("/", async (req: Request, res: Response) => {
+cartRouter.post("/", authenticateUser, async (req: Request, res: Response) => {
     try {
         const { userId, foodId, quantity } = req.body;
         const local = await Cart.findOne({ userId });
-        console.log(local);
         if (!local) {
             console.log("it is not finding local");
             const newCart = new Cart({ userId, items: [{ foodId, quantity }] });
@@ -20,7 +20,6 @@ cartRouter.post("/", async (req: Request, res: Response) => {
                 (item) => item.foodId.toString() === foodId.toString()
             );
             if (!existingItem) {
-                console.log(existingItem);
                 local.items.push({ foodId, quantity });
             } else {
                 existingItem.quantity += quantity;
@@ -35,7 +34,7 @@ cartRouter.post("/", async (req: Request, res: Response) => {
 });
 
 //
-cartRouter.delete("/:userId/:foodId", async (req: Request, res: Response) => {
+cartRouter.delete("/:userId/:foodId", authenticateUser, async (req: Request, res: Response) => {
     try {
         const { userId, foodId } = req.params;
         const local = await Cart.findOne({ userId });
@@ -58,10 +57,10 @@ cartRouter.delete("/:userId/:foodId", async (req: Request, res: Response) => {
 
 //
 
-cartRouter.get("/:userId", async (req: Request, res: Response) => {
+cartRouter.get("/:userId", authenticateUser, async (req: Request, res: Response) => {
     try {
-        const id = req.params.userID;
-        const cart = await Cart.findOne({ id });
+        const userId = req.params.userId;
+        const cart = await Cart.findOne({ userId });
         res.status(200).json(cart);
     } catch (error) {
         console.log(error);
@@ -69,7 +68,7 @@ cartRouter.get("/:userId", async (req: Request, res: Response) => {
     }
 });
 
-cartRouter.get("/", async (req: Request, res: Response) => {
+cartRouter.get("/", authenticateUser,async (req: Request, res: Response) => {
     try {
         const cart = await Cart.find();
         res.status(200).json(cart);

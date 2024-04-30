@@ -21,10 +21,11 @@ userRouter.post("/signup", async (req: Request, res: Response) => {
         }
         const newUser = new User(user);
         await newUser.save();
-        const token = jwt.sign({ email, role: "user" }, SECRET, {
+        const userRole = user.role || "user";
+        const token = jwt.sign({ email, role: userRole }, SECRET, {
             expiresIn: "1h",
         });
-        return res.status(200).send(token);
+        return res.status(200).send({ token, user:newUser });
     } catch (error) {
         console.log(error);
         return res.status(500).send("Internal Server Error");
@@ -40,35 +41,33 @@ userRouter.post("/login", async (req: AuthenticatedRequest, res: Response) => {
         if (!local) {
             res.status(403).send("Invalid Credentials ..");
         }
-        const token = jwt.sign({ email, role: "user" }, SECRET, {
+        const token = jwt.sign({ email, role: local.role }, SECRET, {
             expiresIn: "1h",
         });
-        req.user = user;
-        req.role = local.role;
-        res.status(200).send(token);
+        const response = {
+            token,
+            user: { ...local.toObject(), _id: local._id.toString() },
+        };
+        res.status(200).send(response);
     } catch (error) {
         console.log(error);
         return res.status(500).send("Internal Server Error");
     }
 });
 
-
-
-userRouter.get("/me/:_email", async (req:Request,res:Response)=>{
-    try{
+userRouter.get("/me/:_email", async (req: Request, res: Response) => {
+    try {
         const email = req.params._email;
-    const local = await User.findOne({email});
-    if(!local){
-        res.status(400).send("User with the given Email doesn't exist");
-    }
-    else{
-        res.status(200).json(local);
-    }
-    }catch(error){
+        const local = await User.findOne({ email });
+        if (!local) {
+            res.status(400).send("User with the given Email doesn't exist");
+        } else {
+            res.status(200).json(local);
+        }
+    } catch (error) {
         console.log(error);
         res.status(500).send(error);
     }
-
-})
+});
 
 export = userRouter;

@@ -4,9 +4,9 @@ import {
     foodsState,
     userDetailsState,
 } from "../Store/Atoms/atoms";
-import Navbar from "./Appbar";
 import React, { useState } from "react";
 import axios from "axios";
+
 import {
     Button,
     Card,
@@ -17,6 +17,7 @@ import {
     Select,
     Typography,
 } from "@mui/material";
+import { jwtDecode } from "jwt-decode";
 
 function Home() {
     const [foods, setFoods] = useRecoilState(foodsState);
@@ -25,8 +26,6 @@ function Home() {
     type Quantities = Record<string, number>;
 
     const [initialQuantities, setInitialQuantities] = useState<Quantities>({});
-
-    React.useEffect(() => {}, []);
 
     const handleQuantityChange = (event, foodId) => {
         const selectedValue = event.target.value; // Get the selected value from the event
@@ -45,6 +44,7 @@ function Home() {
                 )}`
             ); // Adjust the API endpoint as per your backend setup
             setUserDetails(response.data);
+            console.log(userDetails);
         } catch (error) {
             console.error("Error fetching user details:", error);
         }
@@ -67,13 +67,34 @@ function Home() {
 
     const handleAddToCart = async (foodId: string) => {
         try {
-            const response = await axios.post("http://localhost:3000/cart/", {
-                userId: userDetails._id,
-                foodId,
-                quantity: initialQuantities[foodId], // You can adjust the quantity as needed
-            });
+            const token = localStorage.getItem("token");
+            if (!token) {
+                window.alert("Please login to continue");
+            } else {
+                const decodedToken= jwtDecode(token);
+                const role = decodedToken.role;
+                if (role !== "user") {
+                    window.alert("Please login to continue");
+                } else {
+                    const response = await axios.post(
+                        "http://localhost:3000/cart/",
+                        {
+                            userId: userDetails._id,
+                            foodId,
+                            quantity: initialQuantities[foodId],
+                        },
+                        {
+                            headers: {
+                                authorization: token,
+                            },
+                        }
+                    );
 
-            console.log("Added to cart:", response.data); // Refresh cart items after adding
+                    console.log("Added to cart:", response.data);
+                    window.alert("Food Successfully added to cart ");
+                }
+            }
+            // Refresh cart items after adding
         } catch (error) {
             console.error("Error adding to cart:", error);
         }
@@ -81,13 +102,6 @@ function Home() {
 
     return (
         <div>
-            <Navbar
-                email={userDetails.email}
-                name={userDetails.name}
-                userDetails={userDetails}
-                setUserDetails={setUserDetails}
-                foods={foods}
-            />
             <br />
             <div
                 style={{
@@ -98,10 +112,10 @@ function Home() {
                 }}
             >
                 {foods.map((food) => (
-                    <Card key={food._id} sx={{ maxWidth: 400 }}>
+                    <Card key={food._id} sx={{ width: 300 }}>
                         <CardMedia
                             component="img"
-                            sx={{ height: "25vh", width: "40vh" }}
+                            sx={{ height: "25vh", width: "100%" }}
                             image={food.imageUrl}
                             alt={food.name}
                         />
@@ -120,15 +134,17 @@ function Home() {
                                 {food.description}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Price: ${food.price}
+                                Price: Rs {food.price}
                             </Typography>
+                            <br />
                             <Button
                                 variant="contained"
                                 onClick={() => handleAddToCart(food._id)}
                             >
                                 Add to Cart
                             </Button>
-                            <FormControl>
+
+                            <FormControl sx={{ marginLeft: 4 }}>
                                 <Select
                                     labelId={`quantity-label-${food._id}`}
                                     id={`quantity-select-${food._id}`}

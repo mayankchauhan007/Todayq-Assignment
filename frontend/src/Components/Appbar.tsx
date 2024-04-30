@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Box,
     Toolbar,
@@ -13,15 +13,20 @@ import {
     ListItemText,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Food, User } from "../Store/Atoms/atoms";
+import { foodsState, userDetailsState } from "../Store/Atoms/atoms";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { jwtDecode } from "jwt-decode";
 
-function Navbar({ email, name, userDetails, setUserDetails, foods }) {
+function Navbar() {
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState(null);
     const [cartItems, setCartItems] = useState([]);
     const [cartPopoverOpen, setCartPopoverOpen] = useState(false);
+    const [userDetails, setUserDetails] = useRecoilState(userDetailsState);
+    const foods = useRecoilValue(foodsState);
+    const email = localStorage.getItem("userEmail");
     const [filtered, setFiltered] = useState([]);
 
     const [filteredFoods, setFilteredFoods] = useState([]);
@@ -29,6 +34,28 @@ function Navbar({ email, name, userDetails, setUserDetails, foods }) {
     const open = Boolean(anchorEl);
     const id = open ? "profile-popover" : undefined;
     const cartPopoverId = "cart-popover";
+
+
+    useEffect( () => {
+        const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
+
+        const fetchDataFromApi = async () => {
+            try {
+                const decodedToken = jwtDecode(token);
+                console.log("Decoded Token:", decodedToken);
+                const response = await axios.get(`http://localhost:3000/user/me/${decodedToken.email}`);
+                setUserDetails(response.data);
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                // Handle error as needed
+            }
+        };
+        if (token) {
+            fetchDataFromApi();
+        } else {
+            console.error("Token not found in localStorage");
+        }
+    }, [setUserDetails]);
 
     const handleMenuClick = async (event) => {
         setAnchorEl(event.currentTarget);
@@ -47,12 +74,16 @@ function Navbar({ email, name, userDetails, setUserDetails, foods }) {
 
     const fetchCartItems = async () => {
         try {
+            const token = localStorage.getItem("token");
+            console.log(userDetails._id);
             const response = await axios.get(
-                "http://localhost:3000/cart/" + userDetails._id
+                `http://localhost:3000/cart/${userDetails._id}`,
+                { headers: { Authorization: token } } // Pass the Authorization header directly
             );
+            console.log(response.data);
+            console.log("fetch cart response");
             const items = response.data.items;
             setCartItems(items);
-
             const filtered = foods.filter((food) =>
                 items.some((item) => item.foodId === food._id)
             );
@@ -67,8 +98,8 @@ function Navbar({ email, name, userDetails, setUserDetails, foods }) {
 
             setFilteredFoods(filteredWithQuantity);
 
-            console.log(filtered);
-            console.log("filtered foods ");
+            // console.log(filtered);
+            // console.log("filtered foods ");
         } catch (error) {
             console.error("Error fetching cart items:", error);
         }
@@ -121,102 +152,126 @@ function Navbar({ email, name, userDetails, setUserDetails, foods }) {
                                             address: "",
                                             role: "",
                                         });
+                                        navigate("/");
                                     }}
                                 >
                                     Logout
                                 </Button>
-                                <IconButton
-                                    aria-describedby={id}
-                                    onClick={handleMenuClick}
-                                    color="inherit"
-                                >
-                                    <Avatar
-                                        alt={name}
-                                        src="https://t4.ftcdn.net/jpg/04/83/90/95/360_F_483909569_OI4LKNeFgHwvvVju60fejLd9gj43dIcd.jpg"
-                                    />
-                                </IconButton>
-                                <Popover
-                                    id={id}
-                                    open={open}
-                                    anchorEl={anchorEl}
-                                    onClose={handleClose}
-                                    anchorOrigin={{
-                                        vertical: "bottom",
-                                        horizontal: "right",
-                                    }}
-                                    transformOrigin={{
-                                        vertical: "top",
-                                        horizontal: "right",
-                                    }}
-                                >
-                                    <List>
-                                        <ListItem button>
-                                            <ListItemText primary="My Profile" />
-                                        </ListItem>
-                                        <ListItem
-                                            button
-                                            onClick={handleCartClick}
+
+                                {userDetails.role === "user" && (
+                                    <>
+                                        <IconButton
+                                            aria-describedby={id}
+                                            onClick={handleMenuClick}
+                                            color="inherit"
                                         >
-                                            <ListItemText primary="My Cart" />
-                                        </ListItem>
-                                    </List>
-                                </Popover>
-                                <Popover
-                                    id={cartPopoverId}
-                                    open={cartPopoverOpen}
-                                    anchorEl={anchorEl}
-                                    onClose={() => setCartPopoverOpen(false)}
-                                    anchorOrigin={{
-                                        vertical: "bottom",
-                                        horizontal: "right",
-                                    }}
-                                    transformOrigin={{
-                                        vertical: "top",
-                                        horizontal: "right",
-                                    }}
-                                >
-                                    <List>
-                                        {filteredFoods.map((food, index) => (
-                                            <ListItem key={index}>
-                                                <ListItemText
-                                                    primary={`Name: ${food.name}`}
-                                                    secondary={`Description: ${food.description}, Price: $${food.price}, Quantity: ${food.quantity}`}
-                                                />
-                                                <Button
-                                                    variant="contained"
-                                                    color="secondary"
-                                                    onClick={async () => {
-                                                        try {
-                                                            await axios.delete(
-                                                                `http://localhost:3000/cart/${userDetails._id}/${food._id}`
-                                                            );
-                                                            // Refresh cart items after deleting
-                                                            await fetchCartItems();
-                                                            console.log(
-                                                                "Item deleted successfully"
-                                                            );
-                                                        } catch (error) {
-                                                            console.error(
-                                                                "Error deleting item:",
-                                                                error
-                                                            );
-                                                        }
-                                                    }}
+                                            <Avatar
+                                                src="https://t4.ftcdn.net/jpg/04/83/90/95/360_F_483909569_OI4LKNeFgHwvvVju60fejLd9gj43dIcd.jpg"
+                                            />
+                                        </IconButton>
+                                        <Popover
+                                            id={id}
+                                            open={open}
+                                            anchorEl={anchorEl}
+                                            onClose={handleClose}
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "right",
+                                            }}
+                                            transformOrigin={{
+                                                vertical: "top",
+                                                horizontal: "right",
+                                            }}
+                                        >
+                                            <List>
+                                                <ListItem button>
+                                                    <ListItemText primary="My Profile" />
+                                                </ListItem>
+                                                <ListItem
+                                                    button
+                                                    onClick={handleCartClick}
                                                 >
-                                                    Delete
-                                                </Button>
-                                                <Button
-                                                    component={Link}
-                                                    to={`/buy/${food._id}/${food.quantity}`}
-                                                    variant="contained"
-                                                    color="primary"
-                                                >
-                                                    Proceed to Buy
-                                                </Button>
-                                            </ListItem>
-                                        ))}
-                                    </List>
-                                </Popover>
+                                                    <ListItemText primary="My Cart" />
+                                                </ListItem>
+                                            </List>
+                                        </Popover>
+                                        <Popover
+                                            id={cartPopoverId}
+                                            open={cartPopoverOpen}
+                                            anchorEl={anchorEl}
+                                            onClose={() =>
+                                                setCartPopoverOpen(false)
+                                            }
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "right",
+                                            }}
+                                            transformOrigin={{
+                                                vertical: "top",
+                                                horizontal: "right",
+                                            }}
+                                        >
+                                            <List>
+                                                {filteredFoods.map(
+                                                    (food, index) => (
+                                                        <ListItem key={index}>
+                                                            <ListItemText
+                                                                primary={`Name: ${food.name}`}
+                                                                secondary={`Description: ${food.description}, Price: Rs. ${food.price}, Quantity: ${food.quantity}`}
+                                                            />
+                                                            <Button
+                                                                variant="contained"
+                                                                color="secondary"
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        const token =
+                                                                            localStorage.getItem(
+                                                                                "token"
+                                                                            );
+                                                                        await axios.delete(
+                                                                            `http://localhost:3000/cart/${userDetails._id}/${food._id}`,
+                                                                            {
+                                                                                headers:
+                                                                                    {
+                                                                                        Authorization:
+                                                                                            token,
+                                                                                    },
+                                                                            }
+                                                                        );
+                                                                        // Refresh cart items after deleting
+                                                                        await fetchCartItems();
+                                                                        console.log(
+                                                                            "Item deleted successfully"
+                                                                        );
+                                                                    } catch (error) {
+                                                                        console.error(
+                                                                            "Error deleting item:",
+                                                                            error
+                                                                        );
+                                                                    }
+                                                                }}
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                            <Button
+                                                                sx={{
+                                                                    marginLeft: 2,
+                                                                }}
+                                                                component={Link}
+                                                                to={`/buy/${food._id}/${food.quantity}`}
+                                                                variant="contained"
+                                                                color="primary"
+                                                                onClick={handleClose}
+                                                            >
+                                                                Buy Item
+                                                            </Button>
+                                                        </ListItem>
+                                                    )
+                                                )}
+                                            </List>
+                                        </Popover>
+                                    </>
+                                )}
                             </div>
                         ) : (
                             <p>Please log in to continue.</p>
