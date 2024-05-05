@@ -12,7 +12,7 @@ import {
     ListItem,
     ListItemText,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
+import HomeIcon from '@mui/icons-material/Home';
 import { foodsState, userDetailsState } from "../Store/Atoms/atoms";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -122,8 +122,11 @@ function Navbar() {
                             color="inherit"
                             aria-label="menu"
                             sx={{ mr: 2 }}
+                            onClick={()=>{
+                                navigate("/");
+                            }}
                         >
-                            <MenuIcon />
+                            <HomeIcon />
                         </IconButton>
                         <Typography
                             variant="h6"

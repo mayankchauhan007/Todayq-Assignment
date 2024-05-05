@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useRecoilValue } from "recoil";
 export default function BuyItem() {
     const { foodId } = useParams<{ foodId: string }>();
     const { quantity: quantityParam } = useParams<{
@@ -16,6 +17,7 @@ export default function BuyItem() {
     }>();
 
     const navigate = useNavigate();
+    const userDetails = useRecoilValue(userDetailsState);
 
     const [selectedFood, setSelectedFood] = React.useState<Food>();
 
@@ -89,7 +91,11 @@ export default function BuyItem() {
                     const body = {
                         paymentId : response.razorpay_payment_id,
                         orderId : order.id,
-                        razorpaySign: response.razorpay_signature
+                        razorpaySign: response.razorpay_signature,
+                        userId : userDetails._id,
+                        foodId,
+                        quantity,
+                        amount : order.amount/100,
                     }
                     const verificationResponse = await axios.post("http://localhost:3000/payment/order/verification",body);
                     if(verificationResponse.data.msg === 'success'){

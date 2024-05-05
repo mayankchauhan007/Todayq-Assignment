@@ -8,8 +8,12 @@ const userSchema = new mongoose.Schema({
     address: String,
     role: {
         type: String,
-        default: "user", // Default value for the role field
+        default: "user", 
     },
+    purchaseHistory: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order" 
+    }]
 });
 
 const foodSchema = new mongoose.Schema({
@@ -49,6 +53,27 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required:true
     },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
+    items: [
+        {
+            foodId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Food",
+            },
+            quantity: {
+                type: Number,
+                default: 1,
+            },
+            amount: {
+                type: Number,
+                default: 1,
+            },
+        },
+
+    ],
     // Add more fields as per your requirements
 });
 
