@@ -1,4 +1,9 @@
-import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import {
+    Navigate,
+    Route,
+    BrowserRouter as Router,
+    Routes,
+} from "react-router-dom";
 import "./App.css";
 import Signup from "./Components/Signup";
 import Signin from "./Components/Signin";
@@ -11,6 +16,7 @@ import { AddFood } from "./Components/AddFood";
 import { UpdateFood } from "./Components/UpdateFood";
 import Navbar from "./Components/Appbar";
 import Unauthorized from "./Components/Unauthorized";
+import PaymentSuccess from "./Components/PaymentSuccess";
 function App() {
     const userDetails = useRecoilValue(userDetailsState);
     const role = userDetails.role;
@@ -24,31 +30,64 @@ function App() {
                 <Route path="/" element={<Home />} />
 
                 {/* Route for Admin Dashboard */}
-                {role === 'admin' ? (
-                    <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                {role === "admin" ? (
+                    <Route
+                        path="/admin-dashboard"
+                        element={<AdminDashboard />}
+                    />
                 ) : (
                     <Route path="/admin-dashboard" element={<Unauthorized />} />
                 )}
 
                 {/* Route for adding food (admin only) */}
-                {role === 'admin' ? (
-                    <Route path="/admin-dashboard/addFood" element={<AddFood />} />
+                {role === "admin" ? (
+                    <Route
+                        path="/admin-dashboard/addFood"
+                        element={<AddFood />}
+                    />
                 ) : (
-                    <Route path="/admin-dashboard/addFood" element={<Unauthorized />} />
+                    <Route
+                        path="/admin-dashboard/addFood"
+                        element={<Unauthorized />}
+                    />
                 )}
 
                 {/* Route for updating food (admin only) */}
-                {role === 'admin' ? (
-                    <Route path="/admin-dashboard/updateFood/:foodId" element={<UpdateFood />} />
+                {role === "admin" ? (
+                    <Route
+                        path="/admin-dashboard/updateFood/:foodId"
+                        element={<UpdateFood />}
+                    />
                 ) : (
-                    <Route path="/admin-dashboard/updateFood/:foodId" element={<Unauthorized />} />
+                    <Route
+                        path="/admin-dashboard/updateFood/:foodId"
+                        element={<Unauthorized />}
+                    />
                 )}
 
                 {/* Route for buying items */}
-                {role === 'user' ? (
-                    <Route path="/buy/:foodId/:quantity" element={<BuyItem />} />
+                {role === "user" ? (
+                    <Route
+                        path="/buy/:foodId/:quantity"
+                        element={<BuyItem />}
+                    />
                 ) : (
-                    <Route path="/buy/:foodId/:quantity" element={<Unauthorized />} />
+                    <Route
+                        path="/buy/:foodId/:quantity"
+                        element={<Unauthorized />}
+                    />
+                )}
+
+                {role === "user" ? (
+                    <Route
+                        path="/buy/paymentSuccess"
+                        element={<PaymentSuccess />}
+                    />
+                ) : (
+                    <Route
+                        path="/buy/paymentSuccess"
+                        element={<Unauthorized />}
+                    />
                 )}
 
                 {/* Route for unauthorized access */}

@@ -1,6 +1,5 @@
-import { useParams } from "react-router-dom";
-import { useRecoilValue } from "recoil";
-import { Food, foodsState } from "../Store/Atoms/atoms";
+import { useNavigate, useParams } from "react-router-dom";
+import { Food, userDetailsState } from "../Store/Atoms/atoms";
 import {
     Button,
     Card,
@@ -16,8 +15,9 @@ export default function BuyItem() {
         quantity: string | undefined;
     }>();
 
-    const [selectedFood, setSelectedFood] = React.useState<Food>();
+    const navigate = useNavigate();
 
+    const [selectedFood, setSelectedFood] = React.useState<Food>();
 
     const initialQuantity = 0;
 
@@ -35,35 +35,113 @@ export default function BuyItem() {
         }
     };
 
-    const getFoodItem = async () =>{
-        const response = await axios.get("http://localhost:3000/foods/"+foodId);
+    const getFoodItem = async () => {
+        const response = await axios.get(
+            "http://localhost:3000/foods/" + foodId
+        );
         console.log(response.data);
         setSelectedFood(response.data);
-    }
+    };
 
     useEffect(() => {
-      getFoodItem();
-    }, [foodId])
-    
+        const razorpayScript = document.createElement("script");
+        razorpayScript.src = "https://checkout.razorpay.com/v1/checkout.js";
+        razorpayScript.async = true;
+
+        document.body.appendChild(razorpayScript);
+
+        return () => {
+            document.body.removeChild(razorpayScript);
+        };
+    }, []);
+
+    useEffect(() => {
+        getFoodItem();
+    }, [foodId]);
 
     if (!selectedFood) {
         return <div>Food not found</div>;
     }
+    const paymentHandler = async (e) => {
+        try {
+            const response = await axios.post(
+                "http://localhost:3000/payment/order/",
+                {
+                    amount: Number(selectedFood.price * quantity * 100),
+                    currency: "INR",
+                    receipt: "somethisngf1",
+                }
+            );
+
+            console.log(response.data);
+            const order = response.data;
+            console.log("order");
+            console.log(order);
+            const options = {
+                key: "rzp_test_Kqzx3o2RzIs61V", // Enter the Key ID generated from the Dashboard
+                amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                currency: "INR",
+                name: "Insta Food",
+                description: "Test Transaction using Razorpay",
+                image: "https://example.com/your_logo",
+                order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                handler: async function (response){
+                    const body = {
+                        paymentId : response.razorpay_payment_id,
+                        orderId : order.id,
+                        razorpaySign: response.razorpay_signature
+                    }
+                    const verificationResponse = await axios.post("http://localhost:3000/payment/order/verification",body);
+                    if(verificationResponse.data.msg === 'success'){
+                        navigate("/buy/paymentSuccess");
+                        
+                    }
+                },
+                prefill: {
+                    name: "Mayank Kumar",
+                    email: "mayank@example.com",
+                    contact: "8433231040",
+                },
+                notes: {
+                    address: "Razorpay Corporate Office",
+                },
+                theme: {
+                    color: "#23f23c",
+                },
+            };
+            const razor = new window.Razorpay(options);
+
+            razor.open();
+
+            console.log(response.data);
+            console.log(window);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "100vh",
+            }}
+        >
             <Card key={selectedFood._id} sx={{ width: 600 }}>
-                <h1 style={{ textAlign: 'center' }}>Buy Item</h1>
+                <h1 style={{ textAlign: "center" }}>Buy Item</h1>
                 <CardMedia
                     component="img"
                     sx={{
-                        height: '50vh',
-                        width: '50vh',
-                        margin: '0 auto', // Center the image horizontally
+                        height: "50vh",
+                        width: "50vh",
+                        margin: "0 auto", // Center the image horizontally
                     }}
                     image={selectedFood.imageUrl}
                     alt={selectedFood.name}
                 />
-                <CardContent style={{ textAlign: 'center' }}>
+                <CardContent style={{ textAlign: "center" }}>
                     <Typography gutterBottom variant="h5" component="div">
                         {selectedFood.name}
                     </Typography>
@@ -80,13 +158,13 @@ export default function BuyItem() {
                         Quantity:
                         <button
                             style={{
-                                fontSize: '14px',
-                                padding: '5px 10px',
-                                margin: '0 5px',
-                                border: '1px solid #ccc',
-                                backgroundColor: '#fff',
-                                cursor: 'pointer',
-                                color: 'red',
+                                fontSize: "14px",
+                                padding: "5px 10px",
+                                margin: "0 5px",
+                                border: "1px solid #ccc",
+                                backgroundColor: "#fff",
+                                cursor: "pointer",
+                                color: "red",
                             }}
                             onClick={handleDecrement}
                         >
@@ -95,13 +173,13 @@ export default function BuyItem() {
                         {quantity}
                         <button
                             style={{
-                                fontSize: '14px',
-                                padding: '5px 10px',
-                                margin: '0 5px',
-                                border: '1px solid #ccc',
-                                backgroundColor: '#fff',
-                                cursor: 'pointer',
-                                color: 'green',
+                                fontSize: "14px",
+                                padding: "5px 10px",
+                                margin: "0 5px",
+                                border: "1px solid #ccc",
+                                backgroundColor: "#fff",
+                                cursor: "pointer",
+                                color: "green",
                             }}
                             onClick={handleIncrement}
                         >
@@ -109,11 +187,11 @@ export default function BuyItem() {
                         </button>
                     </Typography>
                     <br />
-                    <Button variant="contained">Proceed to Pay {selectedFood.price*quantity}</Button>
+                    <Button variant="contained" onClick={paymentHandler}>
+                        Proceed to Pay {selectedFood.price * quantity}
+                    </Button>
                 </CardContent>
             </Card>
         </div>
     );
 }
-
-

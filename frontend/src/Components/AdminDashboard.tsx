@@ -1,6 +1,5 @@
 import { useRecoilState } from "recoil";
 import { foodsState } from "../Store/Atoms/atoms";
-import Navbar from "./Appbar";
 import axios from "axios";
 import {
     Button,

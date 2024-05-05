@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import userRouter from "./Routes/UserRoutes";
 import foodRouter from "./Routes/FoodRoutes";
 import cartRouter from "./Routes/cartRoutes";
+import paymentRouter from "./Routes/PaymentRoutes";
 app.use(express.json());
 app.use(cors());
 
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
 app.use("/user", userRouter);
 app.use("/foods", foodRouter);
 app.use("/cart", cartRouter);
+app.use("/payment", paymentRouter);
 
 const startDB = async () => {
     try {
