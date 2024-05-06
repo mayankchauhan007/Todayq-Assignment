@@ -16,6 +16,7 @@ export interface UserDetails {
   password: string;
   address: string;
   role: string;
+  purchaseHistory:string []
 }
 
 
@@ -34,6 +35,7 @@ export const userDetailsState = atom<UserDetails>({
     password: '',
     address: '',
     role: '',
+    purchaseHistory : []
   },
 });
 

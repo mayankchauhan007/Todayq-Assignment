@@ -168,6 +168,7 @@ function SignInCard({ email, setEmail, password, setPassword }) {
                                     password: user.password,
                                     address: user.address,
                                     role: user.role,
+                                    purchaseHistory:user.purchaseHistory
                                 });
                                 console.log(userDetails);
                                 localStorage.setItem("userEmail", user.email);

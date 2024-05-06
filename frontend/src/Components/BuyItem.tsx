@@ -10,6 +10,7 @@ import {
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRecoilValue } from "recoil";
+import { jwtDecode } from "jwt-decode";
 export default function BuyItem() {
     const { foodId } = useParams<{ foodId: string }>();
     const { quantity: quantityParam } = useParams<{
@@ -66,61 +67,84 @@ export default function BuyItem() {
     }
     const paymentHandler = async (e) => {
         try {
-            const response = await axios.post(
-                "http://localhost:3000/payment/order/",
-                {
-                    amount: Number(selectedFood.price * quantity * 100),
-                    currency: "INR",
-                    receipt: "somethisngf1",
+            const token = localStorage.getItem("token");
+            if (!token) {
+                window.alert("Please login to continue");
+            } else {
+                const decodedToken= jwtDecode(token);
+                const role = decodedToken.role;
+                if (role !== "user") {
+                    window.alert("Please login to continue");
+                } else {
+                    const response = await axios.post(
+                        "http://localhost:3000/payment/order/",
+                        {
+                            amount: Number(selectedFood.price * quantity * 100),
+                            currency: "INR",
+                            receipt: "somethisngf1",
+                        },
+                        {
+                            headers: {
+                                authorization: token,
+                            },
+                        }
+                    );
+        
+                    console.log(response.data);
+                    const order = response.data;
+                    console.log("order");
+                    console.log(order);
+                    const options = {
+                        key: "rzp_test_Kqzx3o2RzIs61V", // Enter the Key ID generated from the Dashboard
+                        amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                        currency: "INR",
+                        name: "Insta Food",
+                        description: "Test Transaction using Razorpay",
+                        image: "https://example.com/your_logo",
+                        order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                        handler: async function (response) {
+                            const body = {
+                                paymentId: response.razorpay_payment_id,
+                                orderId: order.id,
+                                razorpaySign: response.razorpay_signature,
+                                userId: userDetails._id,
+                                foodId,
+                                quantity,
+                                amount: order.amount / 100,
+                            };
+                            const verificationResponse = await axios.post(
+                                "http://localhost:3000/payment/order/verification",
+                                body,
+                                {
+                                    headers: {
+                                        authorization: token,
+                                    },
+                                }
+                            );
+                            if (verificationResponse.data.msg === "success") {
+                                navigate("/buy/paymentSuccess");
+                            }
+                        },
+                        prefill: {
+                            name: "Mayank Kumar",
+                            email: "mayank@example.com",
+                            contact: "8433231040",
+                        },
+                        notes: {
+                            address: "Razorpay Corporate Office",
+                        },
+                        theme: {
+                            color: "#23f23c",
+                        },
+                    };
+                    const razor = new window.Razorpay(options);
+        
+                    razor.open();
+        
+                    console.log(response.data);
+                    console.log(window);
                 }
-            );
-
-            console.log(response.data);
-            const order = response.data;
-            console.log("order");
-            console.log(order);
-            const options = {
-                key: "rzp_test_Kqzx3o2RzIs61V", // Enter the Key ID generated from the Dashboard
-                amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-                currency: "INR",
-                name: "Insta Food",
-                description: "Test Transaction using Razorpay",
-                image: "https://example.com/your_logo",
-                order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-                handler: async function (response){
-                    const body = {
-                        paymentId : response.razorpay_payment_id,
-                        orderId : order.id,
-                        razorpaySign: response.razorpay_signature,
-                        userId : userDetails._id,
-                        foodId,
-                        quantity,
-                        amount : order.amount/100,
-                    }
-                    const verificationResponse = await axios.post("http://localhost:3000/payment/order/verification",body);
-                    if(verificationResponse.data.msg === 'success'){
-                        navigate("/buy/paymentSuccess");
-                        
-                    }
-                },
-                prefill: {
-                    name: "Mayank Kumar",
-                    email: "mayank@example.com",
-                    contact: "8433231040",
-                },
-                notes: {
-                    address: "Razorpay Corporate Office",
-                },
-                theme: {
-                    color: "#23f23c",
-                },
-            };
-            const razor = new window.Razorpay(options);
-
-            razor.open();
-
-            console.log(response.data);
-            console.log(window);
+            }
         } catch (error) {
             console.log(error);
         }

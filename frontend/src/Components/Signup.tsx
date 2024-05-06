@@ -193,6 +193,7 @@ function SignupCard({
                                     password: user.password,
                                     address: user.address,
                                     role: user.role,
+                                    purchaseHistory:user.purchaseHistory
                                   });
 
                                 localStorage.setItem("token", token);

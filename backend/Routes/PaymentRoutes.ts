@@ -2,10 +2,11 @@ import express, { Request, Response } from "express";
 import Razorpay from "razorpay";
 import { Food, Order, User } from "../db/db";
 import * as crypto from "crypto";
+import { authenticateUser } from "../middlewares/auth";
 
 const paymentRouter = express.Router();
 
-paymentRouter.post("/order", async (req: Request, res: Response) => {
+paymentRouter.post("/order", authenticateUser,  async (req: Request, res: Response) => {
     try {
         const razorpay = new Razorpay({
             key_id: "rzp_test_Kqzx3o2RzIs61V",
@@ -27,6 +28,7 @@ paymentRouter.post("/order", async (req: Request, res: Response) => {
 
 paymentRouter.post(
     "/order/verification/",
+    authenticateUser,
     async (req: Request, res: Response) => {
         try {
             console.log(req.body);
@@ -82,5 +84,22 @@ paymentRouter.post(
         }
     }
 );
+
+
+
+
+paymentRouter.get("/order/:userId", authenticateUser, async (req: Request, res: Response) => {
+    try {
+        const userId = req.params.userId;
+        const orders = await Order.find({ userId }).populate('items.foodId');
+        if (!orders) {
+            return res.status(404).send("No orders found for the user");
+        }
+        res.status(200).send(orders);
+    } catch (error) {
+        res.status(500).send("Error while fetching orders: " + error);
+        console.log(error);
+    }
+});
 
 export = paymentRouter;

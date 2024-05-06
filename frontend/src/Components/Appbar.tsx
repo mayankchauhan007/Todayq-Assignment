@@ -11,9 +11,10 @@ import {
     List,
     ListItem,
     ListItemText,
+    Divider,
 } from "@mui/material";
-import HomeIcon from '@mui/icons-material/Home';
-import { foodsState, userDetailsState } from "../Store/Atoms/atoms";
+import HomeIcon from "@mui/icons-material/Home";
+import { foodsState, userDetailsState, userState } from "../Store/Atoms/atoms";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -29,21 +30,43 @@ function Navbar() {
     const email = localStorage.getItem("userEmail");
     const [filtered, setFiltered] = useState([]);
 
+    const [boughtItems, setBoughtItems] = useState([]);
     const [filteredFoods, setFilteredFoods] = useState([]);
 
     const open = Boolean(anchorEl);
     const id = open ? "profile-popover" : undefined;
     const cartPopoverId = "cart-popover";
 
+    const [profilePopoverOpen, setProfilePopoverOpen] = useState(false);
+    const profilePopoverId = "profile-popover";
 
-    useEffect( () => {
+    const handleProfileClick = async () => {
+        setProfilePopoverOpen(true);
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+            "http://localhost:3000/payment/order/" + userDetails._id,
+            {
+                headers: {
+                    authorization: token,
+                },
+            }
+        );
+        console.log("boughtItems");
+        console.log(response.data);
+        setBoughtItems(response.data);
+    };
+
+    
+    useEffect(() => {
         const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
 
         const fetchDataFromApi = async () => {
             try {
                 const decodedToken = jwtDecode(token);
                 console.log("Decoded Token:", decodedToken);
-                const response = await axios.get(`http://localhost:3000/user/me/${decodedToken.email}`);
+                const response = await axios.get(
+                    `http://localhost:3000/user/me/${decodedToken.email}`
+                );
                 setUserDetails(response.data);
             } catch (error) {
                 console.error("Error fetching user data:", error);
@@ -122,7 +145,7 @@ function Navbar() {
                             color="inherit"
                             aria-label="menu"
                             sx={{ mr: 2 }}
-                            onClick={()=>{
+                            onClick={() => {
                                 navigate("/");
                             }}
                         >
@@ -148,6 +171,7 @@ function Navbar() {
                                         localStorage.clear();
                                         console.log("logout pressed");
                                         setUserDetails({
+                                            ...userDetails,
                                             _id: "",
                                             name: "",
                                             email: "",
@@ -168,9 +192,7 @@ function Navbar() {
                                             onClick={handleMenuClick}
                                             color="inherit"
                                         >
-                                            <Avatar
-                                                src="https://t4.ftcdn.net/jpg/04/83/90/95/360_F_483909569_OI4LKNeFgHwvvVju60fejLd9gj43dIcd.jpg"
-                                            />
+                                            <Avatar src="https://t4.ftcdn.net/jpg/04/83/90/95/360_F_483909569_OI4LKNeFgHwvvVju60fejLd9gj43dIcd.jpg" />
                                         </IconButton>
                                         <Popover
                                             id={id}
@@ -187,7 +209,10 @@ function Navbar() {
                                             }}
                                         >
                                             <List>
-                                                <ListItem button>
+                                                <ListItem
+                                                    onClick={handleProfileClick}
+                                                    button
+                                                >
                                                     <ListItemText primary="My Profile" />
                                                 </ListItem>
                                                 <ListItem
@@ -264,10 +289,147 @@ function Navbar() {
                                                                 to={`/buy/${food._id}/${food.quantity}`}
                                                                 variant="contained"
                                                                 color="primary"
-                                                                onClick={handleClose}
+                                                                onClick={
+                                                                    handleClose
+                                                                }
                                                             >
                                                                 Buy Item
                                                             </Button>
+                                                        </ListItem>
+                                                    )
+                                                )}
+                                            </List>
+                                        </Popover>
+                                        <Popover
+                                            id={profilePopoverId}
+                                            open={profilePopoverOpen}
+                                            anchorEl={anchorEl}
+                                            onClose={() =>
+                                                setProfilePopoverOpen(false)
+                                            }
+                                            anchorOrigin={{
+                                                vertical: "bottom",
+                                                horizontal: "right",
+                                            }}
+                                            transformOrigin={{
+                                                vertical: "top",
+                                                horizontal: "right",
+                                            }}
+                                        >
+                                            <List
+                                                style={{
+                                                    padding: "16px",
+                                                    maxWidth: "300px",
+                                                }}
+                                            >
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Name"
+                                                        secondary={
+                                                            userDetails.name
+                                                        }
+                                                        primaryTypographyProps={{
+                                                            style: {
+                                                                fontWeight:
+                                                                    "bold",
+                                                            },
+                                                        }}
+                                                    />
+                                                </ListItem>
+                                                <Divider />
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Email"
+                                                        secondary={
+                                                            userDetails.email
+                                                        }
+                                                        primaryTypographyProps={{
+                                                            style: {
+                                                                fontWeight:
+                                                                    "bold",
+                                                            },
+                                                        }}
+                                                    />
+                                                </ListItem>
+                                                <Divider />
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Address"
+                                                        secondary={
+                                                            userDetails.address
+                                                        }
+                                                        primaryTypographyProps={{
+                                                            style: {
+                                                                fontWeight:
+                                                                    "bold",
+                                                            },
+                                                        }}
+                                                    />
+                                                </ListItem>
+                                                <Divider />
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Purchase History"
+                                                        primaryTypographyProps={{
+                                                            style: {
+                                                                fontWeight:
+                                                                    "bold",
+                                                            },
+                                                        }}
+                                                    />
+                                                </ListItem>
+                                                {boughtItems.map(
+                                                    (order, index) => (
+                                                        <ListItem
+                                                            key={index}
+                                                            style={{
+                                                                marginTop:
+                                                                    "8px",
+                                                            }}
+                                                        >
+                                                            <List
+                                                                style={{
+                                                                    marginLeft:
+                                                                        "16px",
+                                                                }}
+                                                            >
+                                                                {order.items.map(
+                                                                    (
+                                                                        item,
+                                                                        i
+                                                                    ) => (
+                                                                        <ListItem
+                                                                            key={
+                                                                                i
+                                                                            }
+                                                                        >
+                                                                            <ListItemText
+                                                                                primary={`Food Name: ${item.foodId.name}`}
+                                                                                secondary={`Amount: ${item.amount}`}
+                                                                                primaryTypographyProps={{
+                                                                                    style: {
+                                                                                        fontWeight:
+                                                                                            "bold",
+                                                                                        display:
+                                                                                            "block",
+                                                                                    },
+                                                                                }}
+                                                                            />
+                                                                            <ListItemText
+                                                                                primary={`Quantity: ${item.quantity}`}
+                                                                            />
+                                                                            {/* Add more food details as needed */}
+                                                                            {i !==
+                                                                                order
+                                                                                    .items
+                                                                                    .length -
+                                                                                    1 && (
+                                                                                <Divider />
+                                                                            )}
+                                                                        </ListItem>
+                                                                    )
+                                                                )}
+                                                            </List>
                                                         </ListItem>
                                                     )
                                                 )}
