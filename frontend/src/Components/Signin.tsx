@@ -8,7 +8,7 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import WebFont from "webfontloader";
-import food from "../assets/foods.jpg";
+import instafood from "../assets/instafood.png";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
@@ -214,10 +214,10 @@ function ImageCard() {
     return (
         <div>
             <img
-                src={food}
+                src={instafood}
                 style={{
                     width: "56vw",
-                    height: "600px",
+                    height: "560px",
                     borderRadius: "8px",
                     margin: "8px",
                     marginRight: "20px",

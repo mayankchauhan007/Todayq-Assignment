@@ -146,7 +146,13 @@ function Navbar() {
                             aria-label="menu"
                             sx={{ mr: 2 }}
                             onClick={() => {
-                                navigate("/");
+                                if(userDetails.role === 'user'){
+                                    navigate("/");
+                                }
+                                else if( userDetails.role === 'admin') {
+                                    navigate("/admin-dashboard")
+                                }
+                                
                             }}
                         >
                             <HomeIcon />
@@ -244,8 +250,8 @@ function Navbar() {
                                                     (food, index) => (
                                                         <ListItem key={index}>
                                                             <ListItemText
-                                                                primary={`Name: ${food.name}`}
-                                                                secondary={`Description: ${food.description}, Price: Rs. ${food.price}, Quantity: ${food.quantity}`}
+                                                                primary={`Food Name: ${food.name}`}
+                                                                secondary={` Price: Rs. ${food.price}, Quantity: ${food.quantity}`}
                                                             />
                                                             <Button
                                                                 variant="contained"

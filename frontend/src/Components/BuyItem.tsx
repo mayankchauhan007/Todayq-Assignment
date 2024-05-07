@@ -71,7 +71,7 @@ export default function BuyItem() {
             if (!token) {
                 window.alert("Please login to continue");
             } else {
-                const decodedToken= jwtDecode(token);
+                const decodedToken = jwtDecode(token);
                 const role = decodedToken.role;
                 if (role !== "user") {
                     window.alert("Please login to continue");
@@ -89,7 +89,7 @@ export default function BuyItem() {
                             },
                         }
                     );
-        
+
                     console.log(response.data);
                     const order = response.data;
                     console.log("order");
@@ -134,13 +134,13 @@ export default function BuyItem() {
                             address: "Razorpay Corporate Office",
                         },
                         theme: {
-                            color: "#23f23c",
+                            color: "#0E0F13",
                         },
                     };
                     const razor = new window.Razorpay(options);
-        
+
                     razor.open();
-        
+
                     console.log(response.data);
                     console.log(window);
                 }
@@ -215,6 +215,9 @@ export default function BuyItem() {
                         >
                             +
                         </button>
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Deliver to Address : {userDetails.address}
                     </Typography>
                     <br />
                     <Button variant="contained" onClick={paymentHandler}>

@@ -96,6 +96,7 @@ export const AddFood = () => {
                         fullWidth
                         onClick={async () => {
                             try {
+                                const token  = localStorage.getItem('token');
                                 const response = await axios.post(
                                     "http://localhost:3000/foods/",
                                     {
