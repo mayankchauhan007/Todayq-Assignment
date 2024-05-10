@@ -1,5 +1,4 @@
 import {
-    Navigate,
     Route,
     BrowserRouter as Router,
     Routes,
@@ -16,7 +15,6 @@ import { AddFood } from "./Components/AddFood";
 import { UpdateFood } from "./Components/UpdateFood";
 import Navbar from "./Components/Appbar";
 import Unauthorized from "./Components/Unauthorized";
-import PaymentSuccess from "./Components/PaymentSuccess";
 import Footer from "./Components/Footer";
 function App() {
     const userDetails = useRecoilValue(userDetailsState);
@@ -79,17 +77,6 @@ function App() {
                     />
                 )}
 
-                {role === "user" ? (
-                    <Route
-                        path="/buy/paymentSuccess"
-                        element={<PaymentSuccess />}
-                    />
-                ) : (
-                    <Route
-                        path="/buy/paymentSuccess"
-                        element={<Unauthorized />}
-                    />
-                )}
 
                 {/* Route for unauthorized access */}
                 <Route path="/unauthorized" element={<Unauthorized />} />

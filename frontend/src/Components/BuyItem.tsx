@@ -65,7 +65,7 @@ export default function BuyItem() {
     if (!selectedFood) {
         return <div>Food not found</div>;
     }
-    const paymentHandler = async (e) => {
+    const paymentHandler = async () => {
         try {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -122,7 +122,8 @@ export default function BuyItem() {
                                 }
                             );
                             if (verificationResponse.data.msg === "success") {
-                                navigate("/buy/paymentSuccess");
+                                window.alert("Payment Success");
+                                navigate("/");
                             }
                         },
                         prefill: {

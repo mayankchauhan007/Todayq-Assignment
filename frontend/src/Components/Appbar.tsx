@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { SetStateAction, useEffect, useState } from "react";
 import {
     Box,
     Toolbar,
@@ -14,7 +15,7 @@ import {
     Divider,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-import { foodsState, userDetailsState, userState } from "../Store/Atoms/atoms";
+import { foodsState, userDetailsState } from "../Store/Atoms/atoms";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -58,7 +59,7 @@ function Navbar() {
 
     
     useEffect(() => {
-        const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
+        const token = localStorage.getItem("token");
 
         const fetchDataFromApi = async () => {
             try {
@@ -80,7 +81,7 @@ function Navbar() {
         }
     }, [setUserDetails]);
 
-    const handleMenuClick = async (event) => {
+    const handleMenuClick = async (event: { currentTarget: SetStateAction<null>; }) => {
         setAnchorEl(event.currentTarget);
         await fetchCartItems();
     };
@@ -108,14 +109,14 @@ function Navbar() {
             const items = response.data.items;
             setCartItems(items);
             const filtered = foods.filter((food) =>
-                items.some((item) => item.foodId === food._id)
+                items.some((item: { foodId: string; }) => item.foodId === food._id)
             );
 
             setFiltered(filtered);
 
             const filteredWithQuantity = filtered.map((food) => ({
                 ...food,
-                quantity: items.find((item) => item.foodId === food._id)
+                quantity: items.find((item: { foodId: string; }) => item.foodId === food._id)
                     .quantity,
             }));
 

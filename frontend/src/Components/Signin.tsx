@@ -12,7 +12,7 @@ import instafood from "../assets/instafood.png";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
-import { User, userDetailsState, userState } from "../Store/Atoms/atoms";
+import { userDetailsState } from "../Store/Atoms/atoms";
 import React from "react";
 import axios from "axios";
 
@@ -36,9 +36,6 @@ function Signin() {
         });
     }, []);
 
-    const [email, setEmail] = React.useState("");
-    const [password, setPassword] = React.useState("");
-
     const isMdScreen = useMediaQuery("(min-width: 600px)");
     return (
         <>
@@ -58,12 +55,7 @@ function Signin() {
                         md={5}
                         sx={{ display: "flex", justifyContent: "center" }}
                     >
-                        <SignInCard
-                            email={email}
-                            setEmail={setEmail}
-                            password={password}
-                            setPassword={setPassword}
-                        />
+                        <SignInCard />
                     </Grid>
 
                     {isMdScreen && (
@@ -77,9 +69,11 @@ function Signin() {
     );
 }
 
-function SignInCard({ email, setEmail, password, setPassword }) {
+function SignInCard() {
     const [userDetails, setUserDetails] = useRecoilState(userDetailsState);
     const navigate = useNavigate();
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
     return (
         <Card
             elevation={10}
@@ -168,7 +162,7 @@ function SignInCard({ email, setEmail, password, setPassword }) {
                                     password: user.password,
                                     address: user.address,
                                     role: user.role,
-                                    purchaseHistory:user.purchaseHistory
+                                    purchaseHistory: user.purchaseHistory,
                                 });
                                 console.log(userDetails);
                                 localStorage.setItem("userEmail", user.email);
@@ -185,9 +179,7 @@ function SignInCard({ email, setEmail, password, setPassword }) {
                             }
                         } catch (error) {
                             console.error("Error response:", error);
-                            window.alert(
-                                "Something went wrong ."
-                            );
+                            window.alert("Something went wrong .");
                         }
                     }}
                 >

@@ -13,13 +13,9 @@ import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useRecoilState } from "recoil";
-import { User, userDetailsState, userState } from "../Store/Atoms/atoms";
+import { userDetailsState } from "../Store/Atoms/atoms";
 
 function Signup() {
-    const [name, setName] = React.useState("");
-    const [email, setEmail] = React.useState("");
-    const [password, setPassword] = React.useState("");
-    const [address, setAddress] = React.useState("");
     useEffect(() => {
         WebFont.load({
             google: {
@@ -58,16 +54,7 @@ function Signup() {
                         md={5}
                         sx={{ display: "flex", justifyContent: "center" }}
                     >
-                        <SignupCard
-                            name={name}
-                            setName={setName}
-                            email={email}
-                            setEmail={setEmail}
-                            password={password}
-                            setPassword={setPassword}
-                            address={address}
-                            setAddress={setAddress}
-                        />
+                        <SignupCard />
                     </Grid>
 
                     {isMdScreen && (
@@ -81,19 +68,14 @@ function Signup() {
     );
 }
 
-function SignupCard({
-    name,
-    setName,
-    email,
-    setEmail,
-    password,
-    setPassword,
-    address,
-    setAddress,
-}) {
+function SignupCard() {
+    const [name, setName] = React.useState("");
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const [address, setAddress] = React.useState("");
     const navigate = useNavigate();
-    
-    const [userDetails,setUserDetails] = useRecoilState(userDetailsState);
+
+    const [userDetails, setUserDetails] = useRecoilState(userDetailsState);
     return (
         <Card
             elevation={10}
@@ -184,7 +166,7 @@ function SignupCard({
                                     address,
                                 }
                             );
-                            const {token,user} = response.data;
+                            const { token, user } = response.data;
                             if (response.status === 200) {
                                 setUserDetails({
                                     _id: user._id,
@@ -193,8 +175,8 @@ function SignupCard({
                                     password: user.password,
                                     address: user.address,
                                     role: user.role,
-                                    purchaseHistory:user.purchaseHistory
-                                  });
+                                    purchaseHistory: user.purchaseHistory,
+                                });
 
                                 localStorage.setItem("token", token);
                                 localStorage.setItem("userEmail", user.email);
@@ -205,7 +187,6 @@ function SignupCard({
                                 } else {
                                     navigate("/"); // Redirect to user dashboard for other roles
                                 }
-
                             } else {
                                 window.alert(
                                     "Sign up failed. Please try again."
@@ -259,7 +240,6 @@ function ImageCard() {
                 }}
             />
         </div>
-        
     );
 }
 

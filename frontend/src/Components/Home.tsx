@@ -39,7 +39,6 @@ function Home() {
         const response = await axios.get("http://localhost:3000/foods/");
         console.log(response.data);
         setFoods(response.data);
-        foodLength = foods.length;
 
         try {
             const response = await axios.get(

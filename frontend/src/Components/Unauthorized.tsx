@@ -17,12 +17,13 @@ const Unauthorized = () => {
                         localStorage.clear();
                         console.log("logout pressed");
                         setUserDetails({
+                            ...userDetails,
                             _id: "",
                             name: "",
                             email: "",
                             password: "",
                             address: "",
-                            role: "",
+                            role: ""
                         });
                         navigate("/");
                     }}
