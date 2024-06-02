@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Food, userDetailsState } from "../Store/Atoms/atoms";
+import { Content, userDetailsState } from "../Store/Atoms/atoms";
 import {
     Button,
     Card,
@@ -12,7 +12,7 @@ import axios from "axios";
 import { useRecoilValue } from "recoil";
 import { jwtDecode } from "jwt-decode";
 export default function BuyItem() {
-    const { foodId } = useParams<{ foodId: string }>();
+    const { contentId } = useParams<{ contentId: string }>();
     const { quantity: quantityParam } = useParams<{
         quantity: string | undefined;
     }>();
@@ -20,7 +20,7 @@ export default function BuyItem() {
     const navigate = useNavigate();
     const userDetails = useRecoilValue(userDetailsState);
 
-    const [selectedFood, setSelectedFood] = React.useState<Food>();
+    const [selectedContent, setSelectedContent] = React.useState<Content>();
 
     const initialQuantity = 0;
 
@@ -38,12 +38,12 @@ export default function BuyItem() {
         }
     };
 
-    const getFoodItem = async () => {
+    const getContentItem = async () => {
         const response = await axios.get(
-            "http://localhost:3000/foods/" + foodId
+            "http://localhost:3000/contents/" + contentId
         );
         console.log(response.data);
-        setSelectedFood(response.data);
+        setSelectedContent(response.data);
     };
 
     useEffect(() => {
@@ -59,11 +59,11 @@ export default function BuyItem() {
     }, []);
 
     useEffect(() => {
-        getFoodItem();
-    }, [foodId]);
+        getContentItem();
+    }, [contentId]);
 
-    if (!selectedFood) {
-        return <div>Food not found</div>;
+    if (!selectedContent) {
+        return <div>Content not found</div>;
     }
     const paymentHandler = async () => {
         try {
@@ -79,7 +79,9 @@ export default function BuyItem() {
                     const response = await axios.post(
                         "http://localhost:3000/payment/order/",
                         {
-                            amount: Number(selectedFood.price * quantity * 100),
+                            amount: Number(
+                                selectedContent.price * quantity * 100
+                            ),
                             currency: "INR",
                             receipt: "somethisngf1",
                         },
@@ -98,7 +100,7 @@ export default function BuyItem() {
                         key: "rzp_test_Kqzx3o2RzIs61V", // Enter the Key ID generated from the Dashboard
                         amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
                         currency: "INR",
-                        name: "Insta Food",
+                        name: "Todayq",
                         description: "Test Transaction using Razorpay",
                         image: "https://example.com/your_logo",
                         order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
@@ -108,7 +110,7 @@ export default function BuyItem() {
                                 orderId: order.id,
                                 razorpaySign: response.razorpay_signature,
                                 userId: userDetails._id,
-                                foodId,
+                                contentId,
                                 quantity,
                                 amount: order.amount / 100,
                             };
@@ -160,7 +162,7 @@ export default function BuyItem() {
                 minHeight: "100vh",
             }}
         >
-            <Card key={selectedFood._id} sx={{ width: 600 }}>
+            <Card key={selectedContent._id} sx={{ width: 600 }}>
                 <h1 style={{ textAlign: "center" }}>Buy Item</h1>
                 <CardMedia
                     component="img"
@@ -169,21 +171,21 @@ export default function BuyItem() {
                         width: "50vh",
                         margin: "0 auto", // Center the image horizontally
                     }}
-                    image={selectedFood.imageUrl}
-                    alt={selectedFood.name}
+                    image={selectedContent.imageUrl}
+                    alt={selectedContent.name}
                 />
                 <CardContent style={{ textAlign: "center" }}>
                     <Typography gutterBottom variant="h5" component="div">
-                        {selectedFood.name}
+                        {selectedContent.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        {selectedFood.category}
+                        {selectedContent.category}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        {selectedFood.description}
+                        {selectedContent.description}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        Price: Rs {selectedFood.price}
+                        Price: Rs {selectedContent.price}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         Quantity:
@@ -222,7 +224,7 @@ export default function BuyItem() {
                     </Typography>
                     <br />
                     <Button variant="contained" onClick={paymentHandler}>
-                        Proceed to Pay {selectedFood.price * quantity}
+                        Proceed to Pay {selectedContent.price * quantity}
                     </Button>
                 </CardContent>
             </Card>

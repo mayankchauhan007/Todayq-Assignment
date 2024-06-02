@@ -8,7 +8,7 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import WebFont from "webfontloader";
-import instafood from "../assets/instafood.png";
+import instacontent from "../assets/instacontent.png";
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -103,7 +103,7 @@ function SignupCard() {
                         alignItems: "center",
                     }}
                 >
-                    Welcome to Insta Food
+                    Welcome to Todayq Content Offerings
                 </Typography>
                 <Typography
                     gutterBottom
@@ -230,7 +230,7 @@ function ImageCard() {
     return (
         <div>
             <img
-                src={instafood}
+                src={instacontent}
                 style={{
                     width: "56vw",
                     height: "650px",

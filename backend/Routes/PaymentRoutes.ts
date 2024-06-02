@@ -1,30 +1,34 @@
 import express, { Request, Response } from "express";
 import Razorpay from "razorpay";
-import { Food, Order, User } from "../db/db";
+import { Content, Order, User } from "../db/db";
 import * as crypto from "crypto";
 import { authenticateUser } from "../middlewares/auth";
 
 const paymentRouter = express.Router();
 
-paymentRouter.post("/order", authenticateUser,  async (req: Request, res: Response) => {
-    try {
-        const razorpay = new Razorpay({
-            key_id: "rzp_test_Kqzx3o2RzIs61V",
-            key_secret: "tWArl6JkNGFNC8zgMQVVKNyP",
-        });
-        const options = req.body;
-        const order = await razorpay.orders.create(options);
+paymentRouter.post(
+    "/order",
+    authenticateUser,
+    async (req: Request, res: Response) => {
+        try {
+            const razorpay = new Razorpay({
+                key_id: "rzp_test_Kqzx3o2RzIs61V",
+                key_secret: "tWArl6JkNGFNC8zgMQVVKNyP",
+            });
+            const options = req.body;
+            const order = await razorpay.orders.create(options);
 
-        if (!order) {
-            return res.status(500).send("Error placing razorpay order !!");
+            if (!order) {
+                return res.status(500).send("Error placing razorpay order !!");
+            }
+            console.log(order);
+            res.send(order);
+        } catch (error) {
+            res.status(500).send("Error while creating order" + error);
+            console.log(error);
         }
-        console.log(order);
-        res.send(order);
-    } catch (error) {
-        res.status(500).send("Error while creating order" + error);
-        console.log(error);
     }
-});
+);
 
 paymentRouter.post(
     "/order/verification/",
@@ -37,9 +41,9 @@ paymentRouter.post(
                 orderId,
                 razorpaySign,
                 userId,
-                foodId,
+                contentId,
                 quantity,
-                amount
+                amount,
             } = req.body;
             const body = orderId + "|" + paymentId;
             const sha = crypto.createHmac("sha256", "tWArl6JkNGFNC8zgMQVVKNyP");
@@ -55,9 +59,9 @@ paymentRouter.post(
                 return res.status(404).send("User not found");
             }
 
-            const food = await Food.findById(foodId);
-            if (!food) {
-                return res.status(404).send("Food item not found");
+            const content = await Content.findById(contentId);
+            if (!content) {
+                return res.status(404).send("Content item not found");
             }
 
             const order = new Order({
@@ -65,7 +69,7 @@ paymentRouter.post(
                 orderId,
                 razorpaySign,
                 userId,
-                items: [{ foodId, quantity, amount }],
+                items: [{ contentId, quantity, amount }],
             });
 
             await order.save();
@@ -85,21 +89,24 @@ paymentRouter.post(
     }
 );
 
-
-
-
-paymentRouter.get("/order/:userId", authenticateUser, async (req: Request, res: Response) => {
-    try {
-        const userId = req.params.userId;
-        const orders = await Order.find({ userId }).populate('items.foodId');
-        if (!orders) {
-            return res.status(404).send("No orders found for the user");
+paymentRouter.get(
+    "/order/:userId",
+    authenticateUser,
+    async (req: Request, res: Response) => {
+        try {
+            const userId = req.params.userId;
+            const orders = await Order.find({ userId }).populate(
+                "items.contentId"
+            );
+            if (!orders) {
+                return res.status(404).send("No orders found for the user");
+            }
+            res.status(200).send(orders);
+        } catch (error) {
+            res.status(500).send("Error while fetching orders: " + error);
+            console.log(error);
         }
-        res.status(200).send(orders);
-    } catch (error) {
-        res.status(500).send("Error while fetching orders: " + error);
-        console.log(error);
     }
-});
+);
 
 export = paymentRouter;

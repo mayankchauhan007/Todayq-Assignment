@@ -15,7 +15,7 @@ import {
     Divider,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-import { foodsState, userDetailsState } from "../Store/Atoms/atoms";
+import { contentsState, userDetailsState } from "../Store/Atoms/atoms";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -27,12 +27,12 @@ function Navbar() {
     const [cartItems, setCartItems] = useState([]);
     const [cartPopoverOpen, setCartPopoverOpen] = useState(false);
     const [userDetails, setUserDetails] = useRecoilState(userDetailsState);
-    const foods = useRecoilValue(foodsState);
+    const contents = useRecoilValue(contentsState);
     const email = localStorage.getItem("userEmail");
     const [filtered, setFiltered] = useState([]);
 
     const [boughtItems, setBoughtItems] = useState([]);
-    const [filteredFoods, setFilteredFoods] = useState([]);
+    const [filteredContents, setFilteredContents] = useState([]);
 
     const open = Boolean(anchorEl);
     const id = open ? "profile-popover" : undefined;
@@ -57,7 +57,6 @@ function Navbar() {
         setBoughtItems(response.data);
     };
 
-    
     useEffect(() => {
         const token = localStorage.getItem("token");
 
@@ -81,7 +80,9 @@ function Navbar() {
         }
     }, [setUserDetails]);
 
-    const handleMenuClick = async (event: { currentTarget: SetStateAction<null>; }) => {
+    const handleMenuClick = async (event: {
+        currentTarget: SetStateAction<null>;
+    }) => {
         setAnchorEl(event.currentTarget);
         await fetchCartItems();
     };
@@ -108,22 +109,27 @@ function Navbar() {
             console.log("fetch cart response");
             const items = response.data.items;
             setCartItems(items);
-            const filtered = foods.filter((food) =>
-                items.some((item: { foodId: string; }) => item.foodId === food._id)
+            const filtered = contents.filter((content) =>
+                items.some(
+                    (item: { contentId: string }) =>
+                        item.contentId === content._id
+                )
             );
 
             setFiltered(filtered);
 
-            const filteredWithQuantity = filtered.map((food) => ({
-                ...food,
-                quantity: items.find((item: { foodId: string; }) => item.foodId === food._id)
-                    .quantity,
+            const filteredWithQuantity = filtered.map((content) => ({
+                ...content,
+                quantity: items.find(
+                    (item: { contentId: string }) =>
+                        item.contentId === content._id
+                ).quantity,
             }));
 
-            setFilteredFoods(filteredWithQuantity);
+            setFilteredContents(filteredWithQuantity);
 
             // console.log(filtered);
-            // console.log("filtered foods ");
+            // console.log("filtered contents ");
         } catch (error) {
             console.error("Error fetching cart items:", error);
         }
@@ -147,13 +153,11 @@ function Navbar() {
                             aria-label="menu"
                             sx={{ mr: 2 }}
                             onClick={() => {
-                                if(userDetails.role === 'user'){
+                                if (userDetails.role === "user") {
                                     navigate("/");
+                                } else if (userDetails.role === "admin") {
+                                    navigate("/admin-dashboard");
                                 }
-                                else if( userDetails.role === 'admin') {
-                                    navigate("/admin-dashboard")
-                                }
-                                
                             }}
                         >
                             <HomeIcon />
@@ -163,7 +167,7 @@ function Navbar() {
                             component="div"
                             sx={{ flexGrow: 1 }}
                         >
-                            InstaFood
+                            Todayq Content offering
                         </Typography>
                         {email ? (
                             <div
@@ -247,12 +251,12 @@ function Navbar() {
                                             }}
                                         >
                                             <List>
-                                                {filteredFoods.map(
-                                                    (food, index) => (
+                                                {filteredContents.map(
+                                                    (content, index) => (
                                                         <ListItem key={index}>
                                                             <ListItemText
-                                                                primary={`Food Name: ${food.name}`}
-                                                                secondary={` Price: Rs. ${food.price}, Quantity: ${food.quantity}`}
+                                                                primary={`Content Name: ${content.name}`}
+                                                                secondary={` Price: Rs. ${content.price}, Quantity: ${content.quantity}`}
                                                             />
                                                             <Button
                                                                 variant="contained"
@@ -264,7 +268,7 @@ function Navbar() {
                                                                                 "token"
                                                                             );
                                                                         await axios.delete(
-                                                                            `http://localhost:3000/cart/${userDetails._id}/${food._id}`,
+                                                                            `http://localhost:3000/cart/${userDetails._id}/${content._id}`,
                                                                             {
                                                                                 headers:
                                                                                     {
@@ -293,7 +297,7 @@ function Navbar() {
                                                                     marginLeft: 2,
                                                                 }}
                                                                 component={Link}
-                                                                to={`/buy/${food._id}/${food.quantity}`}
+                                                                to={`/buy/${content._id}/${content.quantity}`}
                                                                 variant="contained"
                                                                 color="primary"
                                                                 onClick={
@@ -411,7 +415,7 @@ function Navbar() {
                                                                             }
                                                                         >
                                                                             <ListItemText
-                                                                                primary={`Food Name: ${item.foodId.name}`}
+                                                                                primary={`Content Name: ${item.contentId.name}`}
                                                                                 secondary={`Amount: ${item.amount}`}
                                                                                 primaryTypographyProps={{
                                                                                     style: {
@@ -425,7 +429,7 @@ function Navbar() {
                                                                             <ListItemText
                                                                                 primary={`Quantity: ${item.quantity}`}
                                                                             />
-                                                                            {/* Add more food details as needed */}
+                                                                            {/* Add more content details as needed */}
                                                                             {i !==
                                                                                 order
                                                                                     .items

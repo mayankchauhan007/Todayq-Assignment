@@ -1,5 +1,5 @@
 import { useRecoilState } from "recoil";
-import { foodsState } from "../Store/Atoms/atoms";
+import { contentsState } from "../Store/Atoms/atoms";
 import axios from "axios";
 import {
     Button,
@@ -12,48 +12,55 @@ import { useNavigate } from "react-router-dom";
 import React from "react";
 
 function AdminDashboard() {
-    const [foods, setFoods] = useRecoilState(foodsState);
+    const [contents, setContents] = useRecoilState(contentsState);
     const navigate = useNavigate();
 
     React.useEffect(() => {}, []);
 
     const init = async () => {
-        const response = await axios.get("http://localhost:3000/foods/");
+        const response = await axios.get("http://localhost:3000/contents/");
         console.log(response.data);
-        setFoods(response.data);
+        setContents(response.data);
     };
 
     React.useEffect(() => {
         init();
     }, []);
 
-    const deleteFood = async (_id: string) => {
+    const deleteContent = async (_id: string) => {
         try {
             console.log(_id);
             const response = await axios.delete(
-                "http://localhost:3000/foods/" + _id,
+                "http://localhost:3000/contents/" + _id,
                 {
                     headers: {
                         authorization: localStorage.getItem("token"),
                     },
                 }
             );
-            console.log("Food deleted :", response.data); // Refresh cart items after adding
+            console.log("Content deleted :", response.data); // Refresh cart items after adding
             init();
         } catch (error) {
-            console.error("Error deleting food:", error);
+            console.error("Error deleting content:", error);
         }
     };
 
     return (
-        <div style={{display:'flex', justifyContent:'center',flexDirection:'column',alignItems:'center'}}>
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                flexDirection: "column",
+                alignItems: "center",
+            }}
+        >
             <br />
             <Button
                 variant="contained"
-                color='success'
-                onClick={() => navigate("/admin-dashboard/addFood")}
+                color="success"
+                onClick={() => navigate("/admin-dashboard/addContent")}
             >
-                Add new food
+                Add new content
             </Button>
             <br />
             <div
@@ -64,13 +71,13 @@ function AdminDashboard() {
                     gap: "16px",
                 }}
             >
-                {foods.map((food) => (
-                    <Card key={food._id} sx={{ width: 300 }}>
+                {contents.map((content) => (
+                    <Card key={content._id} sx={{ width: 300 }}>
                         <CardMedia
                             component="img"
                             sx={{ height: "30vh", width: "100%" }}
-                            image={food.imageUrl}
-                            alt={food.name}
+                            image={content.imageUrl}
+                            alt={content.name}
                         />
                         <CardContent>
                             <Typography
@@ -78,23 +85,23 @@ function AdminDashboard() {
                                 variant="h5"
                                 component="div"
                             >
-                                {food.name}
+                                {content.name}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {food.category}
+                                {content.category}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {food.description}
+                                {content.description}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Price: Rs {food.price}
+                                Price: Rs {content.price}
                             </Typography>
                             <Button
                                 variant="contained"
                                 onClick={() =>
                                     navigate(
-                                        "/admin-dashboard/updateFood/" +
-                                            food._id
+                                        "/admin-dashboard/updateContent/" +
+                                            content._id
                                     )
                                 }
                             >
@@ -103,9 +110,9 @@ function AdminDashboard() {
                             <Button
                                 sx={{ marginLeft: 2 }}
                                 variant="contained"
-                                onClick={() => deleteFood(food._id)}
+                                onClick={() => deleteContent(content._id)}
                             >
-                                Delete Food
+                                Delete Content
                             </Button>
                             <br />
                         </CardContent>

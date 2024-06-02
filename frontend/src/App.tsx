@@ -1,8 +1,4 @@
-import {
-    Route,
-    BrowserRouter as Router,
-    Routes,
-} from "react-router-dom";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
 import Signup from "./Components/Signup";
 import Signin from "./Components/Signin";
@@ -11,8 +7,8 @@ import BuyItem from "./Components/BuyItem";
 import { useRecoilValue } from "recoil";
 import { userDetailsState } from "./Store/Atoms/atoms";
 import AdminDashboard from "./Components/AdminDashboard";
-import { AddFood } from "./Components/AddFood";
-import { UpdateFood } from "./Components/UpdateFood";
+import { AddContent } from "./Components/AddContent";
+import { UpdateContent } from "./Components/UpdateContent";
 import Navbar from "./Components/Appbar";
 import Unauthorized from "./Components/Unauthorized";
 import Footer from "./Components/Footer";
@@ -38,28 +34,28 @@ function App() {
                     <Route path="/admin-dashboard" element={<Unauthorized />} />
                 )}
 
-                {/* Route for adding food (admin only) */}
+                {/* Route for adding content (admin only) */}
                 {role === "admin" ? (
                     <Route
-                        path="/admin-dashboard/addFood"
-                        element={<AddFood />}
+                        path="/admin-dashboard/addContent"
+                        element={<AddContent />}
                     />
                 ) : (
                     <Route
-                        path="/admin-dashboard/addFood"
+                        path="/admin-dashboard/addContent"
                         element={<Unauthorized />}
                     />
                 )}
 
-                {/* Route for updating food (admin only) */}
+                {/* Route for updating content (admin only) */}
                 {role === "admin" ? (
                     <Route
-                        path="/admin-dashboard/updateFood/:foodId"
-                        element={<UpdateFood />}
+                        path="/admin-dashboard/updateContent/:contentId"
+                        element={<UpdateContent />}
                     />
                 ) : (
                     <Route
-                        path="/admin-dashboard/updateFood/:foodId"
+                        path="/admin-dashboard/updateContent/:contentId"
                         element={<Unauthorized />}
                     />
                 )}
@@ -67,21 +63,20 @@ function App() {
                 {/* Route for buying items */}
                 {role === "user" ? (
                     <Route
-                        path="/buy/:foodId/:quantity"
+                        path="/buy/:contentId/:quantity"
                         element={<BuyItem />}
                     />
                 ) : (
                     <Route
-                        path="/buy/:foodId/:quantity"
+                        path="/buy/:contentId/:quantity"
                         element={<Unauthorized />}
                     />
                 )}
 
-
                 {/* Route for unauthorized access */}
                 <Route path="/unauthorized" element={<Unauthorized />} />
             </Routes>
-            <Footer/>
+            <Footer />
         </Router>
     );
 }

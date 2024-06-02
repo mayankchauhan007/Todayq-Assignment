@@ -5,7 +5,7 @@ import cors from "cors";
 
 import mongoose from "mongoose";
 import userRouter from "./Routes/UserRoutes";
-import foodRouter from "./Routes/FoodRoutes";
+import contentRouter from "./Routes/ContentRoutes";
 import cartRouter from "./Routes/cartRoutes";
 import paymentRouter from "./Routes/PaymentRoutes";
 app.use(express.json());
@@ -15,16 +15,15 @@ app.get("/", (req, res) => {
     res.send("This is Home Page");
 });
 
-
 app.use("/user", userRouter);
-app.use("/foods", foodRouter);
+app.use("/contents", contentRouter);
 app.use("/cart", cartRouter);
 app.use("/payment", paymentRouter);
 
 const startDB = async () => {
     try {
         await mongoose.connect(
-            "mongodb+srv://mayank:zUNPGZpuks7nSfEQ@cluster0.ycro9jx.mongodb.net/ecommerce"
+            "mongodb+srv://mayank:1UH8sBzovMjw6zWG@cluster0.zzzecoi.mongodb.net/"
         );
         console.log("Mongodb is connected!!!");
         app.listen(port, () => {

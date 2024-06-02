@@ -6,41 +6,14 @@ import {
     Button,
 } from "@mui/material";
 import axios from "axios";
-import React from "react";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 
-export const UpdateFood = () => {
-    const { foodId } = useParams();
-    const [foodName, setFoodName] = useState("");
+export const AddContent = () => {
+    const [contentName, setContentName] = useState("");
     const [category, setCategory] = useState("");
     const [description, setDescription] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const [price, setPrice] = useState(0);
-    const navigate = useNavigate();
-
-    // Fetch food details using foodId and populate the form fields
-    const fetchFoodDetails = async () => {
-        try {
-            const response = await axios.get(
-                `http://localhost:3000/foods/${foodId}`
-            );
-            const foodData = response.data;
-            setFoodName(foodData.name);
-            setCategory(foodData.category);
-            setDescription(foodData.description);
-            setImageUrl(foodData.imageUrl);
-            setPrice(foodData.price);
-        } catch (error) {
-            console.error("Error fetching food details:", error);
-        }
-    };
-
-    // useEffect to fetch food details when the component mounts
-    React.useEffect(() => {
-        fetchFoodDetails();
-    }, []);
-
     return (
         <div
             style={{
@@ -74,23 +47,21 @@ export const UpdateFood = () => {
                             alignItems: "center",
                         }}
                     >
-                        Update Food Item
+                        Add New Content Item
                     </Typography>
 
                     <TextField
                         fullWidth
-                        label="Food Name"
+                        label="Content Name"
                         margin="normal"
-                        value={foodName}
                         onChange={(event) => {
-                            setFoodName(event.target.value);
+                            setContentName(event.target.value);
                         }}
                     />
                     <TextField
                         fullWidth
                         label="Category"
                         margin="normal"
-                        value={category}
                         onChange={(event) => {
                             setCategory(event.target.value);
                         }}
@@ -99,7 +70,6 @@ export const UpdateFood = () => {
                         fullWidth
                         label="Description"
                         margin="normal"
-                        value={description}
                         onChange={(event) => {
                             setDescription(event.target.value);
                         }}
@@ -108,7 +78,6 @@ export const UpdateFood = () => {
                         fullWidth
                         label="Image Url"
                         margin="normal"
-                        value={imageUrl}
                         onChange={(event) => {
                             setImageUrl(event.target.value);
                         }}
@@ -117,7 +86,6 @@ export const UpdateFood = () => {
                         fullWidth
                         label="Price"
                         margin="normal"
-                        value={price}
                         onChange={(event) => {
                             setPrice(parseInt(event.target.value));
                         }}
@@ -129,10 +97,10 @@ export const UpdateFood = () => {
                         onClick={async () => {
                             try {
                                 const token = localStorage.getItem("token");
-                                const response = await axios.put(
-                                    `http://localhost:3000/foods/${foodId}`,
+                                const response = await axios.post(
+                                    "http://localhost:3000/contents/",
                                     {
-                                        name: foodName,
+                                        name: contentName,
                                         category,
                                         description,
                                         price,
@@ -147,11 +115,10 @@ export const UpdateFood = () => {
 
                                 if (response.status === 200) {
                                     console.log(response.data);
-                                    window.alert("Food updated successfully");
-                                    navigate("/admin-dashboard");
+                                    window.alert("Content added successfully");
                                 } else {
                                     window.alert(
-                                        "Update failed. Please try again."
+                                        "Sign up failed. Please try again."
                                     );
                                 }
                             } catch (error) {
@@ -160,7 +127,7 @@ export const UpdateFood = () => {
                             }
                         }}
                     >
-                        Update Food
+                        Add Content
                     </Button>
                 </CardContent>
             </Card>

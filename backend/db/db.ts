@@ -8,15 +8,17 @@ const userSchema = new mongoose.Schema({
     address: String,
     role: {
         type: String,
-        default: "user", 
+        default: "user",
     },
-    purchaseHistory: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Order" 
-    }]
+    purchaseHistory: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Order",
+        },
+    ],
 });
 
-const foodSchema = new mongoose.Schema({
+const contentSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -39,19 +41,18 @@ const foodSchema = new mongoose.Schema({
     },
 });
 
-
 const orderSchema = new mongoose.Schema({
     orderId: {
         type: String,
-        required: true
+        required: true,
     },
     paymentId: {
         type: String,
-        required: true
+        required: true,
     },
     razorpaySign: {
         type: String,
-        required:true
+        required: true,
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -59,9 +60,9 @@ const orderSchema = new mongoose.Schema({
     },
     items: [
         {
-            foodId: {
+            contentId: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "Food",
+                ref: "Content",
             },
             quantity: {
                 type: Number,
@@ -72,7 +73,6 @@ const orderSchema = new mongoose.Schema({
                 default: 1,
             },
         },
-
     ],
     // Add more fields as per your requirements
 });
@@ -85,9 +85,9 @@ const cartSchema = new mongoose.Schema({
     },
     items: [
         {
-            foodId: {
+            contentId: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "Food",
+                ref: "Content",
                 required: true,
             },
             quantity: {
@@ -98,7 +98,7 @@ const cartSchema = new mongoose.Schema({
     ],
 });
 
-export const Order = mongoose.model("Order",orderSchema);
+export const Order = mongoose.model("Order", orderSchema);
 export const Cart = mongoose.model("cart", cartSchema);
 export const User = mongoose.model("User", userSchema);
-export const Food = mongoose.model("Food", foodSchema);
+export const Content = mongoose.model("Content", contentSchema);

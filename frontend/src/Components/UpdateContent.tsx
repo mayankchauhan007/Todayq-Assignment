@@ -6,14 +6,41 @@ import {
     Button,
 } from "@mui/material";
 import axios from "axios";
+import React from "react";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-export const AddFood = () => {
-    const [foodName, setFoodName] = useState("");
+export const UpdateContent = () => {
+    const { contentId } = useParams();
+    const [contentName, setContentName] = useState("");
     const [category, setCategory] = useState("");
     const [description, setDescription] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const [price, setPrice] = useState(0);
+    const navigate = useNavigate();
+
+    // Fetch content details using contentId and populate the form fields
+    const fetchContentDetails = async () => {
+        try {
+            const response = await axios.get(
+                `http://localhost:3000/contents/${contentId}`
+            );
+            const contentData = response.data;
+            setContentName(contentData.name);
+            setCategory(contentData.category);
+            setDescription(contentData.description);
+            setImageUrl(contentData.imageUrl);
+            setPrice(contentData.price);
+        } catch (error) {
+            console.error("Error fetching content details:", error);
+        }
+    };
+
+    // useEffect to fetch content details when the component mounts
+    React.useEffect(() => {
+        fetchContentDetails();
+    }, []);
+
     return (
         <div
             style={{
@@ -47,21 +74,23 @@ export const AddFood = () => {
                             alignItems: "center",
                         }}
                     >
-                        Add New Food Item
+                        Update Content Item
                     </Typography>
 
                     <TextField
                         fullWidth
-                        label="Food Name"
+                        label="Content Name"
                         margin="normal"
+                        value={contentName}
                         onChange={(event) => {
-                            setFoodName(event.target.value);
+                            setContentName(event.target.value);
                         }}
                     />
                     <TextField
                         fullWidth
                         label="Category"
                         margin="normal"
+                        value={category}
                         onChange={(event) => {
                             setCategory(event.target.value);
                         }}
@@ -70,6 +99,7 @@ export const AddFood = () => {
                         fullWidth
                         label="Description"
                         margin="normal"
+                        value={description}
                         onChange={(event) => {
                             setDescription(event.target.value);
                         }}
@@ -78,6 +108,7 @@ export const AddFood = () => {
                         fullWidth
                         label="Image Url"
                         margin="normal"
+                        value={imageUrl}
                         onChange={(event) => {
                             setImageUrl(event.target.value);
                         }}
@@ -86,6 +117,7 @@ export const AddFood = () => {
                         fullWidth
                         label="Price"
                         margin="normal"
+                        value={price}
                         onChange={(event) => {
                             setPrice(parseInt(event.target.value));
                         }}
@@ -96,16 +128,15 @@ export const AddFood = () => {
                         fullWidth
                         onClick={async () => {
                             try {
-                                const token  = localStorage.getItem('token');
-                                const response = await axios.post(
-                                    "http://localhost:3000/foods/",
+                                const token = localStorage.getItem("token");
+                                const response = await axios.put(
+                                    `http://localhost:3000/contents/${contentId}`,
                                     {
-                                        name: foodName,
+                                        name: contentName,
                                         category,
                                         description,
                                         price,
                                         imageUrl,
-                                        
                                     },
                                     {
                                         headers: {
@@ -116,10 +147,13 @@ export const AddFood = () => {
 
                                 if (response.status === 200) {
                                     console.log(response.data);
-                                    window.alert("Food added successfully");
+                                    window.alert(
+                                        "Content updated successfully"
+                                    );
+                                    navigate("/admin-dashboard");
                                 } else {
                                     window.alert(
-                                        "Sign up failed. Please try again."
+                                        "Update failed. Please try again."
                                     );
                                 }
                             } catch (error) {
@@ -128,7 +162,7 @@ export const AddFood = () => {
                             }
                         }}
                     >
-                        Add Food
+                        Update Content
                     </Button>
                 </CardContent>
             </Card>

@@ -1,7 +1,7 @@
 import { useRecoilState } from "recoil";
 import {
     UserDetails,
-    foodsState,
+    contentsState,
     userDetailsState,
 } from "../Store/Atoms/atoms";
 import React, { useState } from "react";
@@ -18,27 +18,29 @@ import {
     Typography,
     Paper,
 } from "@mui/material";
-import Carousel from "react-material-ui-carousel";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
-    const [foods, setFoods] = useRecoilState(foodsState);
+    const [contents, setContents] = useRecoilState(contentsState);
     const [userDetails, setUserDetails] =
         useRecoilState<UserDetails>(userDetailsState);
     type Quantities = Record<string, number>;
     const [initialQuantities, setInitialQuantities] = useState<Quantities>({});
     const navigate = useNavigate();
 
-    const handleQuantityChange = (event, foodId) => {
+    const handleQuantityChange = (event, contentId) => {
         const selectedValue = event.target.value; // Get the selected value from the event
-        setInitialQuantities({ ...initialQuantities, [foodId]: selectedValue }); // Update quantity state for the specific food item
+        setInitialQuantities({
+            ...initialQuantities,
+            [contentId]: selectedValue,
+        }); // Update quantity state for the specific content item
     };
 
     const init = async () => {
-        const response = await axios.get("http://localhost:3000/foods/");
+        const response = await axios.get("http://localhost:3000/contents/");
         console.log(response.data);
-        setFoods(response.data);
+        setContents(response.data);
 
         try {
             const response = await axios.get(
@@ -55,7 +57,7 @@ function Home() {
 
     const changeInitialQuantity = () => {
         const quantities = Object.fromEntries(
-            foods.map((food) => [food._id, 1])
+            contents.map((content) => [content._id, 1])
         );
         setInitialQuantities(quantities);
     };
@@ -66,9 +68,9 @@ function Home() {
 
     React.useEffect(() => {
         changeInitialQuantity();
-    }, [foods]);
+    }, [contents]);
 
-    const handleAddToCart = async (foodId: string) => {
+    const handleAddToCart = async (contentId: string) => {
         try {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -83,8 +85,8 @@ function Home() {
                         "http://localhost:3000/cart/",
                         {
                             userId: userDetails._id,
-                            foodId,
-                            quantity: initialQuantities[foodId],
+                            contentId,
+                            quantity: initialQuantities[contentId],
                         },
                         {
                             headers: {
@@ -94,7 +96,7 @@ function Home() {
                     );
 
                     console.log("Added to cart:", response.data);
-                    window.alert("Food Successfully added to cart ");
+                    window.alert("Content Successfully added to cart ");
                 }
             }
             // Refresh cart items after adding
@@ -106,81 +108,6 @@ function Home() {
     return (
         <div>
             <br />
-            <Carousel
-                autoPlay={true}
-                animation="slide"
-                interval={2000}
-                sx={{ maxWidth: 1200, margin: "auto" }}
-            >
-                {foods.slice(0, 5).map((food) => (
-                    <Paper
-                        key={food._id}
-                        style={{
-                            position: "relative",
-                            width: "100%",
-                            paddingBottom: "48%",
-                            overflow: "hidden", // Ensure the image doesn't overflow the Paper component
-                        }}
-                        onClick={() => {
-                            const token = localStorage.getItem("token");
-                            if (!token) {
-                                window.alert("Please login to continue");
-                            } else {
-                                navigate("/buy/" + food._id + "/" + 1);
-                            }
-                        }}
-                    >
-                        <img
-                            src={food.imageUrl}
-                            alt={food.name}
-                            style={{
-                                position: "absolute",
-                                top: "50%",
-                                left: "50%",
-                                transform: "translate(-50%, -50%)", // Center the image horizontally and vertically
-                                minWidth: "100%", // Ensure the image covers the entire space
-                                minHeight: "100%", // Ensure the image covers the entire space
-                                objectFit: "cover",
-                            }}
-                        />
-                        <div
-                            style={{
-                                position: "absolute",
-                                bottom: 0,
-                                left: 0,
-                                width: "100%",
-                                background: "rgba(0, 0, 0, 0.5)",
-                                color: "#fff",
-                                padding: "50px",
-                                textAlign: "center",
-                            }}
-                        >
-                            <Typography
-                                variant="h6"
-                                style={{
-                                    fontSize: "4rem",
-                                    fontWeight: "bold",
-                                }}
-                            >
-                                {food.name}
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                style={{ fontSize: "1rem" }}
-                            >
-                                {food.description}
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                style={{ fontSize: "1rem" }}
-                            >
-                                {"Price: " + food.price}
-                            </Typography>
-                        </div>
-                    </Paper>
-                ))}
-            </Carousel>
-
             <br />
             <div
                 style={{
@@ -190,13 +117,13 @@ function Home() {
                     gap: "16px",
                 }}
             >
-                {foods.map((food) => (
-                    <Card key={food._id} sx={{ width: 300 }}>
+                {contents.map((content) => (
+                    <Card key={content._id} sx={{ width: 300 }}>
                         <CardMedia
                             component="img"
                             sx={{ height: "25vh", width: "100%" }}
-                            image={food.imageUrl}
-                            alt={food.name}
+                            image={content.imageUrl}
+                            alt={content.name}
                         />
                         <CardContent>
                             <Typography
@@ -204,33 +131,33 @@ function Home() {
                                 variant="h5"
                                 component="div"
                             >
-                                {food.name}
+                                {content.name}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {food.category}
+                                {content.category}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {food.description}
+                                {content.description}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Price: Rs {food.price}
+                                Price: Rs {content.price}
                             </Typography>
                             <br />
                             <Button
                                 variant="contained"
-                                onClick={() => handleAddToCart(food._id)}
+                                onClick={() => handleAddToCart(content._id)}
                             >
                                 Add to Cart
                             </Button>
 
                             <FormControl sx={{ marginLeft: 4 }}>
                                 <Select
-                                    labelId={`quantity-label-${food._id}`}
-                                    id={`quantity-select-${food._id}`}
-                                    value={initialQuantities[food._id] || 1} // Use quantity state for the specific food item
+                                    labelId={`quantity-label-${content._id}`}
+                                    id={`quantity-select-${content._id}`}
+                                    value={initialQuantities[content._id] || 1} // Use quantity state for the specific content item
                                     onChange={(event) =>
-                                        handleQuantityChange(event, food._id)
-                                    } // Pass food ID to handleQuantityChange
+                                        handleQuantityChange(event, content._id)
+                                    } // Pass content ID to handleQuantityChange
                                 >
                                     <MenuItem value={1}>1</MenuItem>
                                     <MenuItem value={2}>2</MenuItem>
