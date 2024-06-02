@@ -9,6 +9,9 @@ Cart fuctionality
 Buy Item Page
 ![image](https://github.com/mayankchauhan007/Todayq-Assignment/assets/87968724/b0bd1003-4471-473b-9599-1b045e117943)
 
+Payment Gateway
+![image](https://github.com/mayankchauhan007/Todayq-Assignment/assets/87968724/8bf584ef-13c0-4d80-b9b8-f3ad9081234d)
+
 Login Page
 ![image](https://github.com/mayankchauhan007/Todayq-Assignment/assets/87968724/28caab3b-0cf7-4ae6-9167-d8e9a1607ac3)
 
